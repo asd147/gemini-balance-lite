@@ -1,4 +1,4 @@
-name = "gemini-balance-lite"
+name = "forward-gemini"
 # 主入口
 main = "src/index.js"
 compatibility_date = "2025-06-17"
