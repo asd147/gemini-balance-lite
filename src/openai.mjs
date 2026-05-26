@@ -15,8 +15,13 @@ export default {
       return new Response(err.message, fixCors({ status: err.status ?? 500 }));
     };
     try {
+      let apiKey;
       const auth = request.headers.get("Authorization");
-      let apiKey = auth?.split(" ")[1];
+      if (auth?.startsWith("Bearer ")) {
+        apiKey = auth.slice(7);
+      } else {
+        apiKey = request.headers.get("x-goog-api-key");
+      }
       if (apiKey && apiKey.includes(',')) {
         const apiKeys = apiKey.split(',').map(k => k.trim()).filter(k => k);
         apiKey = apiKeys[Math.floor(Math.random() * apiKeys.length)];

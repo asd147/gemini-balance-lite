@@ -1,12 +1,58 @@
 import { handleVerification } from './verify_keys.js';
 import openai from './openai.mjs';
 
+/**
+ * Extract and load-balance API keys from either x-goog-api-key or Authorization: Bearer header.
+ * Returns { key, headerName } where headerName indicates which header the key came from.
+ */
+function selectApiKey(request) {
+  // Try x-goog-api-key first
+  const xKey = request.headers.get('x-goog-api-key');
+  if (xKey) {
+    const keys = xKey.split(',').map(k => k.trim()).filter(k => k);
+    if (keys.length > 0) {
+      const selected = keys[Math.floor(Math.random() * keys.length)];
+      return { key: selected, headerName: 'x-goog-api-key' };
+    }
+  }
+
+  // Fallback to Authorization: Bearer
+  const auth = request.headers.get('Authorization');
+  if (auth?.startsWith('Bearer ')) {
+    const token = auth.slice(7);
+    const keys = token.split(',').map(k => k.trim()).filter(k => k);
+    if (keys.length > 0) {
+      const selected = keys[Math.floor(Math.random() * keys.length)];
+      return { key: selected, headerName: 'Authorization' };
+    }
+  }
+
+  return null;
+}
+
+/** OpenAI-compatible endpoint paths (supports both /v1/... and bare paths) */
+const OPENAI_PATHS = [
+  '/chat/completions',
+  '/v1/chat/completions',
+  '/embeddings',
+  '/v1/embeddings',
+  '/models',
+  '/v1/models',
+  '/completions',
+  '/v1/completions',
+];
+
+function isOpenAIPath(pathname) {
+  return OPENAI_PATHS.some(p => pathname.endsWith(p));
+}
+
 export async function handleRequest(request) {
 
   const url = new URL(request.url);
   const pathname = url.pathname;
   const search = url.search;
 
+  // 根路径健康检查
   if (pathname === '/' || pathname === '/index.html') {
     return new Response('Proxy is Running!  More Details: https://github.com/asd147/gemini-balance-lite', {
       status: 200,
@@ -14,38 +60,37 @@ export async function handleRequest(request) {
     });
   }
 
+  // API Key 校验
   if (pathname === '/verify' && request.method === 'POST') {
     return handleVerification(request);
   }
 
-  // 处理OpenAI格式请求
-  if (url.pathname.endsWith("/chat/completions") || url.pathname.endsWith("/completions") || url.pathname.endsWith("/embeddings") || url.pathname.endsWith("/models")) {
+  // OpenAI 兼容格式请求
+  if (isOpenAIPath(pathname)) {
     return openai.fetch(request);
   }
 
+  // Gemini 原生 API 代理
   const targetUrl = `https://generativelanguage.googleapis.com${pathname}${search}`;
 
   try {
     const headers = new Headers();
     for (const [key, value] of request.headers.entries()) {
-      if (key.trim().toLowerCase() === 'x-goog-api-key') {
-        const apiKeys = value.split(',').map(k => k.trim()).filter(k => k);
-        if (apiKeys.length > 0) {
-          const selectedKey = apiKeys[Math.floor(Math.random() * apiKeys.length)];
-          console.log(`Gemini Selected API Key: ${selectedKey}`);
-          headers.set('x-goog-api-key', selectedKey);
+      const lowerKey = key.trim().toLowerCase();
+      if (lowerKey === 'x-goog-api-key') {
+        const apiKey = selectApiKey(request);
+        if (apiKey) {
+          console.log(`Gemini Selected API Key: ${apiKey.key}`);
+          headers.set('x-goog-api-key', apiKey.key);
         }
-      } else {
-        if (key.trim().toLowerCase()==='content-type')
-        {
-           headers.set(key, value);
-        }
+      } else if (lowerKey === 'content-type') {
+        headers.set(key, value);
       }
+      // 其他头部不转发
     }
 
-    console.log('Request Sending to Gemini')
-    console.log('targetUrl:'+targetUrl)
-    console.log(headers)
+    console.log('Request Sending to Gemini');
+    console.log('targetUrl:' + targetUrl);
 
     const response = await fetch(targetUrl, {
       method: request.method,
@@ -53,12 +98,9 @@ export async function handleRequest(request) {
       body: request.body
     });
 
-    console.log("Call Gemini Success")
+    console.log("Call Gemini Success");
 
     const responseHeaders = new Headers(response.headers);
-
-    console.log('Header from Gemini:')
-    console.log(responseHeaders)
 
     responseHeaders.delete('transfer-encoding');
     responseHeaders.delete('connection');
@@ -77,5 +119,5 @@ export async function handleRequest(request) {
     status: 500,
     headers: { 'Content-Type': 'text/plain' }
    });
-}
+  }
 };
