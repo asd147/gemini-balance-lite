@@ -10,7 +10,7 @@
 Gemini API 代理, 使用边缘函数把Gemini API免费中转到国内。还可以聚合多个Gemini API Key，随机选取API Key的使用实现负载均衡，使得Gemini API免费成倍增加。
 
 ## Vercel部署(推荐)
-[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/tech-shrimp/gemini-balance-lite)
+[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/asd147/gemini-balance-lite)
 
 
 1. 点击部署按钮⬆️一键部署。
@@ -33,7 +33,7 @@ Gemini API 代理, 使用边缘函数把Gemini API免费中转到国内。还可
 
 ## Deno部署
 
-1. [fork](https://github.com/tech-shrimp/gemini-balance-lite/fork)本项目
+1. [fork](https://github.com/asd147/gemini-balance-lite/fork)本项目
 2. 登录/注册 https://dash.deno.com/
 3. 创建项目 https://dash.deno.com/new_project
 4. 选择此项目，填写项目名字（请仔细填写项目名字，关系到自动分配的域名）
@@ -57,7 +57,7 @@ Gemini API 代理, 使用边缘函数把Gemini API免费中转到国内。还可
 
 
 ## Cloudflare Worker 部署
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/tech-shrimp/gemini-balance-lite)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/asd147/gemini-balance-lite)
 
 0. CF Worker有可能会分配香港的CDN节点导致无法使用(Gemini不允许香港IP连接)
 0. 广东地区不建议使用Cloudflare Worker 部署
@@ -74,7 +74,7 @@ Gemini API 代理, 使用边缘函数把Gemini API免费中转到国内。还可
 
 
 ## Netlify部署
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/tech-shrimp/gemini-balance-lite)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/asd147/gemini-balance-lite)
 <br>点击部署按钮，登录Github账户即可
 <br>免费分配域名，国内可直连。
 <br>但是不稳定

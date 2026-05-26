@@ -8,7 +8,7 @@ export async function handleRequest(request) {
   const search = url.search;
 
   if (pathname === '/' || pathname === '/index.html') {
-    return new Response('Proxy is Running!  More Details: https://github.com/tech-shrimp/gemini-balance-lite', {
+    return new Response('Proxy is Running!  More Details: https://github.com/asd147/gemini-balance-lite', {
       status: 200,
       headers: { 'Content-Type': 'text/html' }
     });
